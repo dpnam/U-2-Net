@@ -74,7 +74,6 @@ def save_output(image_name, pred_mask, d_dir, thresold = 0.9):
 
     # ouput image
     output_np = (rgba_input*rgba_mask)
-    output_np[output_np == 0] = 1
     output_image = Image.fromarray((output_np*RESCALE).astype('uint8'), 'RGBA')
 
 
@@ -123,7 +122,7 @@ def main():
         img_name = img_name_list[i].split(os.sep)[-1]
         expected_result_name = result_dir + img_name.split(".")[0] +'.png'
         if expected_result_name in result_name_dir:
-            print('output: '+ img_name.split(".")[0] +'.png' + ' already exists in ' + result_dir)
+            print('[ERROR] - output: '+ img_name.split(".")[0] +'.png' + ' already exists in ' + result_dir)
             continue
 
         # process imge
