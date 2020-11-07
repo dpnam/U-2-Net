@@ -1,4 +1,5 @@
 import os
+import sys
 from skimage import io, transform
 import torch
 import torchvision
@@ -74,27 +75,28 @@ def save_output(image_name, pred_mask, d_dir, thresold = 0.9):
 
     # ouput image
     output_np = (rgba_input*rgba_mask)
+    # output_np[output_np == 0] = 1
     output_image = Image.fromarray((output_np*RESCALE).astype('uint8'), 'RGBA')
 
 
     # save output
-    output_name = d_dir + img_name.split(".")[0] + '.png'
+    output_name = d_dir + 'rmBG_' + img_name.split(".")[0] + '.png'
     output_image .save(output_name)
 
 
-def main():
+def removeBackgroundImage(_model_name = 'u2netp'):
 
     # --------- 1. get image path and name ---------
-    model_name='u2netp'# fixed as u2netp
+    model_name= _model_name # u2netp or u2net
 
 
 
     image_dir = os.path.join(os.getcwd(), 'images') # 'images' directory
     result_dir = os.path.join(os.getcwd(), 'results/') # 'results' directory
-    model_dir = os.path.join(os.getcwd(), model_name + '.pth') # path to u2netp pretrained weights
+    model_dir = os.path.join(os.getcwd(), 'weights/' + model_name + '.pth') # path to pretrained weights
 
     img_name_list = glob.glob(image_dir + os.sep + '*')
-    # print(img_name_list)
+    print(img_name_list)
 
     result_name_dir = glob.glob(result_dir + os.sep + '*')
 
@@ -110,7 +112,13 @@ def main():
                                    num_workers=1)
 
     # --------- 3. model define ---------
-    net = U2NETP(3,1)
+    if(model_name == 'u2net'):
+        print("...load U2NET---173.6 MB")
+        net = U2NET(3,1)
+    elif(model_name == 'u2netp'):
+        print("...load U2NEP---4.7 MB")
+        net = U2NETP(3,1)
+
     net.load_state_dict(torch.load(model_dir))
     if torch.cuda.is_available():
         net.cuda()
@@ -120,9 +128,9 @@ def main():
     for i, data in enumerate(salobj_dataloader):
         # get name image and check processed image
         img_name = img_name_list[i].split(os.sep)[-1]
-        expected_result_name = result_dir + img_name.split(".")[0] +'.png'
+        expected_result_name = result_dir + 'rmBG_' + img_name.split(".")[0] +'.png'
         if expected_result_name in result_name_dir:
-            print('[ERROR] - output: '+ img_name.split(".")[0] +'.png' + ' already exists in ' + result_dir)
+            print('output: '+ 'rmBG_' + img_name.split(".")[0] +'.png' + ' already exists in ' + result_dir)
             continue
 
         # process imge
@@ -150,4 +158,9 @@ def main():
         del d1,d2,d3,d4,d5,d6,d7
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 1:
+        removeBackgroundImage()
+    elif (len(sys.argv) == 2) and (sys.argv[1] == 'u2netp' or sys.argv[1] == 'u2net'):
+        removeBackgroundImage(str(sys.argv[1]))
+    else:
+        print("[ERROR] - Invalid command!!!")

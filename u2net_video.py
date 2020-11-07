@@ -1,4 +1,5 @@
 import os
+import sys
 from skimage import io, transform
 import torch
 import torchvision
@@ -85,22 +86,28 @@ def save_output(image_name, pred_mask, d_dir, thresold = 0.9):
     output_image .save(output_name)
 
 
-def main():
+def removeBackgroundVideo(_model_name = 'u2netp'):
 
     # --------- 1. get image path and name ---------
-    model_name='u2netp'# fixed as u2netp
+    model_name = _model_name # u2netp or u2net
 
     video_dir = os.path.join(os.getcwd(), 'videos') # 'videos' directory
     result_dir = os.path.join(os.getcwd(), 'results/') # 'results' directory
-    model_dir = os.path.join(os.getcwd(), model_name + '.pth') # path to u2netp pretrained weights
+    model_dir = os.path.join(os.getcwd(), 'weights/' + model_name + '.pth') # path to pretrained weights
 
     video_name_list = glob.glob(video_dir + os.sep + '*')
-    # print(video_name_list)
+    print(video_name_list)
 
     result_name_dir = glob.glob(result_dir + os.sep + '*')
 
     # --------- 2. model define ---------
-    net = U2NETP(3,1)
+    if(model_name == 'u2net'):
+        print("...load U2NET---173.6 MB")
+        net = U2NET(3,1)
+    elif(model_name == 'u2netp'):
+        print("...load U2NEP---4.7 MB")
+        net = U2NETP(3,1)
+
     net.load_state_dict(torch.load(model_dir))
     if torch.cuda.is_available():
         net.cuda()
@@ -116,7 +123,6 @@ def main():
 
         print("inferencing:", video_name)
 
-
         # get info video
         video = cv2.VideoCapture(video_name)
         # frame_count = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -124,14 +130,8 @@ def main():
         success, frame = video.read()
         height, width, layers = frame.shape
 
-        print("Size video: width = {0}, height = {1}".format(width, height))
-
-
         # create video result
         result = cv2.VideoWriter(expected_result_name, cv2.VideoWriter_fourcc(*'mp4v'), fps, (width, height))
-
-        count = 0
-
         # process video
         while success:
             # write 'frame.png' in video folder
@@ -170,15 +170,7 @@ def main():
 
             # read result
             result_frame_name = video_dir + '/rv_bg_' + 'frame.png'
-            result_frame = cv2.imread(result_frame_name, cv2.IMREAD_UNCHANGED)
-            if result_frame.shape[2] == 3:
-                result_frame = cv2.cvtColor(result_frame, cv2.COLOR_RGB2RGBA)
-
-            if count < 10:
-                print("-> Size frame: width = {0}, height = {1}".format(frame.shape[1], frame.shape[0]))
-                print("-> Size result_frame: width = {0}, height = {1}".format(result_frame.shape[1], result_frame.shape[0]))
-
-            count += 1
+            result_frame = cv2.imread(result_frame_name)
 
             # write frame to result video
             result.write(result_frame)
@@ -196,4 +188,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 1:
+        removeBackgroundVideo()
+    elif (len(sys.argv) == 2) and (sys.argv[1] == 'u2netp' or sys.argv[1] == 'u2net'):
+        removeBackgroundVideo(str(sys.argv[1]))
+    else:
+        print("[ERROR] - Invalid command!!!")
