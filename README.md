@@ -14,7 +14,7 @@
 __Contact__: xuebin[at]ualberta[dot]ca
 
 ## Download the pre-trained model
-[u2net.pth (176.3 MB)](https://drive.google.com/file/d/1tA1efWGkM1BxnMxZ_amFDyVpNp1LEMst/view?usp=sharing) or (u2netp.pth (4.7 MB)](https://drive.google.com/file/d/18_q7KmanC25_zgCm9Pwsd4LHpQMCYe5B/view?usp=sharing) <font color = 'red'>(available in ./weights/) </font> and put it into the dirctory './weights/'
+[u2net.pth (176.3 MB)](https://drive.google.com/file/d/1tA1efWGkM1BxnMxZ_amFDyVpNp1LEMst/view?usp=sharing) or [u2netp.pth (4.7 MB)](https://drive.google.com/file/d/18_q7KmanC25_zgCm9Pwsd4LHpQMCYe5B/view?usp=sharing) <font color = 'red'>(available in ./weights/) </font> and put it into the dirctory './weights/'
 
 ## Required libraries
 
@@ -28,8 +28,8 @@ glob
 
 ## Create folder
 - folder `images`: contain original images
-- folder `video`: contain original videos
-- folder `result`: contain results both images and videos (remove background)
+- folder `videos`: contain original videos
+- folder `results`: contain results both images and videos (remove background)
 
 ## Usage
 - Image: `python u2net_image.py` / `python u2net_image.py u2net` / `python u2net_image.py u2netp`
