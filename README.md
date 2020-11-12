@@ -24,7 +24,8 @@ scikit-image 0.14.0
 PIL 5.2.0  
 PyTorch 0.4.0  
 torchvision 0.2.1  
-glob  
+glob
+Tensorflow 2
 
 ## Create folder
 - folder `images`: contain original images
